@@ -6,7 +6,6 @@ import os
 import json
 import tkMessageBox
 import ttk
-import add_account
 auth_token = 0
 root = Tkinter.Tk()
 root.title("Redfish测试工具".decode('gbk'))
@@ -15,10 +14,11 @@ root.geometry('800x600')
 root.resizable(width=True, height=True)
 var_char_entry_username_add = Tkinter.StringVar()
 var_char_entry_password_add = Tkinter.StringVar()
-var_char_entry_id_add = Tkinter.StringVar()
+#var_char_entry_id_add = Tkinter.StringVar()
 var_char_enabled_or_not = Tkinter.StringVar()
 var_char_locked_or_not = Tkinter.StringVar()
 var_char_roleid = Tkinter.StringVar()
+var_char_id_del = Tkinter.StringVar()
 
 
 
@@ -237,8 +237,8 @@ def showhelp():
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
-def addaccount():
 
+def addaccount():
     new_window = Tkinter.Toplevel()
     new_window.title("增加新用户".decode('gbk'))
     new_window.geometry('600x300')
@@ -246,16 +246,17 @@ def addaccount():
     frame_sec_top.pack(side=Tkinter.TOP)
     Tkinter.Label(frame_sec_top, text='请在如下输入需要增加的用户名/密码/ID等信息'.decode('gbk'), bg='Yellow').pack()
 
-    frame_sec_middle = Tkinter.Frame(new_window, height=6)
+    frame_sec_middle = Tkinter.Frame(new_window, height=10)
     frame_sec_middle.pack(fill=Tkinter.X)
+
     frame_middle_username = Tkinter.Frame(frame_sec_middle)
     frame_middle_username.pack(side=Tkinter.LEFT)
 
     frame_middle_password = Tkinter.Frame(frame_sec_middle)
     frame_middle_password.pack(side=Tkinter.LEFT)
 
-    frame_middle_id = Tkinter.Frame(frame_sec_middle)
-    frame_middle_id.pack(side=Tkinter.LEFT)
+#    frame_middle_id = Tkinter.Frame(frame_sec_middle)
+#    frame_middle_id.pack(side=Tkinter.LEFT)
 
     frame_middle_roleid = Tkinter.Frame(frame_sec_middle)
     frame_middle_roleid.pack(side=Tkinter.LEFT)
@@ -266,27 +267,28 @@ def addaccount():
     frame_middle_locked = Tkinter.Frame(frame_sec_middle)
     frame_middle_locked.pack(side=Tkinter.LEFT)
 
-    Tkinter.Label(frame_middle_username, text='用户名'.decode("gbk"), width=10).pack(side=Tkinter.TOP)
-    Tkinter.Label(frame_middle_password, text='密码'.decode('gbk'), width=10).pack(side=Tkinter.TOP)
-    Tkinter.Label(frame_middle_enabled, text='是否生效'.decode('gbk'), width=10).pack(side=Tkinter.TOP)
-    Tkinter.Label(frame_middle_id, text="用户ID号".decode('gbk'), width=10).pack(side=Tkinter.TOP)
-    Tkinter.Label(frame_middle_roleid, text='用户权限'.decode('gbk'), width=10).pack(side=Tkinter.TOP)
-    Tkinter.Label(frame_middle_locked, text='是否锁定'.decode('gbk'), width=10).pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_middle_username, text='用户名'.decode("gbk"), width=10, height=3).pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_middle_password, text='密码'.decode('gbk'), width=10, height=3).pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_middle_enabled, text='是否生效'.decode('gbk'), width=10, height=3).pack(side=Tkinter.TOP)
+#    Tkinter.Label(frame_middle_id, text="用户ID号".decode('gbk'), width=10).pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_middle_roleid, text='用户权限'.decode('gbk'), width=10, height=3).pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_middle_locked, text='是否锁定'.decode('gbk'), width=10, height=3).pack(side=Tkinter.TOP)
 
 #    global var_char_entry_username_add
 #    var_char_entry_username_add = Tkinter.StringVar()
-    Tkinter.Entry(frame_middle_username, textvariable=var_char_entry_username_add, width=10).pack(
+    Tkinter.Entry(frame_middle_username, textvariable=var_char_entry_username_add, width=10, font=('Helvetica', '10')).pack(
             side=Tkinter.BOTTOM)
 
 #    global var_char_entry_password_add
 #    var_char_entry_password_add = Tkinter.StringVar()
-    Tkinter.Entry(frame_middle_password, textvariable=var_char_entry_password_add, width=10).pack(
+    Tkinter.Entry(frame_middle_password, textvariable=var_char_entry_password_add, width=10, font=('Helvetica', '10')).pack(
             side=Tkinter.BOTTOM)
 
 #    global var_char_enabled_or_not
 #    var_char_enabled_or_not = Tkinter.StringVar()
     enabled_box = ttk.Combobox(frame_middle_enabled, textvariable=var_char_enabled_or_not,
                                    values=['true', 'false'], width=10)
+
     enabled_box.pack(side=Tkinter.BOTTOM)
 
 #    global var_char_locked_or_not
@@ -302,36 +304,81 @@ def addaccount():
 
 #    global var_char_entry_id_add
 #    var_char_entry_id_add = Tkinter.StringVar()
-    Tkinter.Entry(frame_middle_id, textvariable=var_char_entry_id_add, width=10).pack(
-            side=Tkinter.BOTTOM)
+#    Tkinter.Entry(frame_middle_id, textvariable=var_char_entry_id_add, width=10).pack(side=Tkinter.BOTTOM)
 
     frame_sec_bottom = Tkinter.Frame(new_window)
     frame_sec_bottom.pack()
-    Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, command=play_add_account).pack(side=Tkinter.LEFT)
-    Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, command=new_window.quit()).pack(side=Tkinter.RIGHT)
+    Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, height=2, command=play_add_account).pack(side=Tkinter.LEFT)
+    Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, height=2, command=new_window.destroy).pack(side=Tkinter.RIGHT)
+
 
 def play_add_account():
-        try:
-            username_add_account = var_char_entry_username_add.get()
-            password_add_account = var_char_entry_password_add.get()
-            id_add_account = var_char_entry_id_add.get()
-            enabled_str_account = var_char_enabled_or_not.get()
-            locked_str_account = var_char_locked_or_not.get()
-            roleid_str_account = var_char_roleid.get()
-            url_account = "https://%s/redfish/v1/AccountService/Accounts/" % bmc_ip
-            headers = {
-                'x-auth-token': "%s" % auth_token,
-                'cache-control': "no-cache",
-            }
-            payload = '{\"UserName\":\"%s\", \"Password\":\"%s\", \"Locked\":\"%s\", \"RoleId\":\"%s\", \"Enabled\":%s}' % (username_add_account, password_add_account, locked_str_account, roleid_str_account, enabled_str_account)
-            add_account_response = requests.post(url_account, headers=headers, data=payload, verify=False)
-            statuscode_add_account = add_account_response.status_code
-            text_show.delete(0.0, Tkinter.END)
-            text_show.insert(1.0, 'Statuscode of add account:' + os.linesep)
-            text_show.insert(Tkinter.END, statuscode_add_account)
+    try:
+        username_add_account = var_char_entry_username_add.get()
+        password_add_account = var_char_entry_password_add.get()
+#        id_add_account = var_char_entry_id_add.get()
+        enabled_str_account = var_char_enabled_or_not.get()
+        locked_str_account = var_char_locked_or_not.get()
+        roleid_str_account = var_char_roleid.get()
+        url_account = "https://%s/redfish/v1/AccountService/Accounts/" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        payload = '{\"UserName\":\"%s\", \"Password\":\"%s\", \"Locked\":\"%s\", \"RoleId\":\"%s\", \"Enabled\":%s}' % (username_add_account, password_add_account, locked_str_account, roleid_str_account, enabled_str_account)
+        add_account_response = requests.post(url_account, headers=headers, data=payload, verify=False)
+        statuscode_add_account = add_account_response.status_code
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(1.0, 'Statuscode of add account:' + os.linesep)
+        text_show.insert(Tkinter.END, statuscode_add_account)
+        if statuscode_add_account == 201:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '用户创建成功，请手动关闭用户创建窗口'.decode('gbk') )
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '用户创建失败，请检查输入项目'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
 
-        except BaseException:
-            tkMessageBox.showerror('ERROR', 'ERROR')
+
+def delaccount():
+    new_window_del = Tkinter.Toplevel()
+    new_window_del.title("删除用户".decode('gbk'))
+    new_window_del.geometry('600x300')
+    frame_sec_top = Tkinter.Frame(new_window_del, height=6)
+    frame_sec_top.pack(side=Tkinter.TOP)
+    Tkinter.Label(frame_sec_top, text='请在如下输入需要删除的用户ID'.decode('gbk'), bg='Yellow').pack()
+
+    frame_sec_middle = Tkinter.Frame(new_window_del, height=6)
+    frame_sec_middle.pack(fill=Tkinter.X)
+
+    Tkinter.Label(frame_sec_middle, text='用户ID'.decode("gbk"), width=30, height=3).pack(side=Tkinter.TOP)
+
+    Tkinter.Entry(frame_sec_middle, textvariable=var_char_id_del, width=30, font=('Helvetica', '10')).pack(side=Tkinter.BOTTOM)
+
+    frame_sec_bottom = Tkinter.Frame(new_window_del)
+    frame_sec_bottom.pack()
+    Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, command=play_delete_account).pack(side=Tkinter.LEFT)
+    Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, command=new_window_del.destroy).pack(side=Tkinter.RIGHT)
+
+def play_delete_account():
+    try:
+        id_del = var_char_id_del.get()
+        url_account_del = "https://%s/redfish/v1/AccountService/Accounts/%s" % (bmc_ip, id_del)
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        payload = '{\"Id\":\"%s\"}' % id_del
+        add_account_response = requests.delete(url_account_del, headers=headers, data=payload, verify=False)
+        statuscode_add_account = add_account_response.status_code
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(1.0, 'Statuscode of add account:' + os.linesep)
+        text_show.insert(Tkinter.END, statuscode_add_account)
+        if statuscode_add_account == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '用户删除成功，请手动关闭用户创建窗口'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '用户删除失败，请检查输入项目'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
 
 #global new_window
 # top
@@ -429,8 +476,9 @@ menubar_bootdevice['menu'] = menu_bootdevice
 menubar_account = Tkinter.Menubutton(frame_left, text='Account', width=30)
 menubar_account.pack()
 menu_account = Tkinter.Menu(menubar_account)
+menu_account.add_command(label='查看现在的用户'.decode('gbk'))
 menu_account.add_command(label='ADD', command=addaccount)
-#Tkinter.Button(frame_left, text='Add_account', command=addaccount, width=30).pack()
+menu_account.add_command(label='Delete',command=delaccount)
 menubar_account['menu'] = menu_account
 
 Tkinter.mainloop()
