@@ -380,6 +380,42 @@ def play_delete_account():
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
+def displayaccount():
+    try:
+        url_display_account = "https://%s/redfish/v1/AccountService/Accounts" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        qq = requests.get(url_display_account, headers=headers, verify=False)
+        test = qq.json()["Members"]
+        account_num = []
+        url_account = []
+        for line in test:
+            account_num.append(str(line["@odata.id"]).split('/')[-1])
+        for number_account in account_num:
+            url_account.append("https://%s/redfish/v1/AccountService/Accounts/%s" % (bmc_ip, number_account))
+        title_display = "ID".ljust(20) + "UserName".ljust(20) + "RoleId".ljust(15) + "Locked".ljust(10) + "Enabled".ljust(10)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(0.0, title_display + os.linesep)
+        for url_account_display in url_account:
+            response_display_account_1 = requests.get(url_account_display, headers=headers, verify=False)
+            response_display_account = response_display_account_1.json()
+            id_display = response_display_account['Id']
+            username_display  = response_display_account['UserName']
+            roleid_display = response_display_account['RoleId']
+            locked_display = response_display_account['Locked']
+            enabled_display = response_display_account['Enabled']
+            content_display = str(id_display).ljust(20)+ str(username_display).ljust(20) + str(roleid_display).ljust(15)  + str(locked_display).ljust(10) + str(enabled_display).ljust(10)
+            statuscode_display_account = response_display_account_1.status_code
+            if statuscode_display_account != 200:
+                tkMessageBox.showerror('错误'.decode('gbk'), '请检查Auth是否已经过期'.decode('gbk'))
+            text_show.insert(Tkinter.END, content_display + os.linesep)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+
 #global new_window
 # top
 menubar = Tkinter.Menu(root)
@@ -476,9 +512,10 @@ menubar_bootdevice['menu'] = menu_bootdevice
 menubar_account = Tkinter.Menubutton(frame_left, text='Account', width=30)
 menubar_account.pack()
 menu_account = Tkinter.Menu(menubar_account)
-menu_account.add_command(label='查看现在的用户'.decode('gbk'))
-menu_account.add_command(label='ADD', command=addaccount)
-menu_account.add_command(label='Delete',command=delaccount)
+menu_account.add_command(label='查看现在的用户'.decode('gbk'), command=displayaccount)
+menu_account.add_command(label='增加用户'.decode('gbk'), command=addaccount)
+menu_account.add_command(label='删除用户'.decode('gbk'),command=delaccount)
+
 menubar_account['menu'] = menu_account
 
 Tkinter.mainloop()
