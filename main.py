@@ -8,6 +8,8 @@ import tkMessageBox
 import ttk
 import account_service
 import chassis
+import system
+import manager
 
 auth_token = 0
 bmc_ip = 0
@@ -28,6 +30,8 @@ var_char_roleid_change = Tkinter.StringVar()
 var_char_entry_id_change_password = Tkinter.StringVar()
 var_char_entry_new_passwd = Tkinter.StringVar()
 var_char_fanmode = Tkinter.StringVar()
+var_char_combox_bootdevice = Tkinter.StringVar()
+var_char_combox_mousemode = Tkinter.StringVar()
 
 
 def get_x_auth_token():
@@ -48,38 +52,6 @@ def get_x_auth_token():
         text_show.insert('1.0', 'Below is the authorized key:' + os.linesep + auth_token)
     except BaseException:
         tkMessageBox.showerror('错误'.decode('gbk'), '请检查IP/用户名/密码是否正确。网络是否通畅'.decode('gbk'))
-
-
-def get_processor1_info():
-    try:
-        url_cpu1_info = "https://%s/redfish/v1/Systems/1/Processors/1" % bmc_ip
-        headers = {
-            'x-auth-token': "%s" % auth_token,
-            'cache-control': "no-cache",
-        }
-        response_cpu1 = requests.get(url_cpu1_info, headers=headers, verify=False)
-        response_cpu1_info = json.dumps(response_cpu1.json(), indent=4)
-        text_show.delete(0.0, Tkinter.END)
-        text_show.insert(1.0, 'Below is the infomation of CPU1' + os.linesep)
-        text_show.insert(Tkinter.END, response_cpu1_info)
-    except BaseException:
-        tkMessageBox.showerror('ERROR', 'ERROR')
-
-
-def get_processor2_info():
-    try:
-        url_cpu2_info = "https://%s/redfish/v1/Systems/1/Processors/2" % bmc_ip
-        headers = {
-            'x-auth-token': "%s" % auth_token,
-            'cache-control': "no-cache",
-        }
-        response_cpu2 = requests.get(url_cpu2_info, headers=headers, verify=False)
-        response_cpu2_info = json.dumps(response_cpu2.json(), indent=4)
-        text_show.delete(0.0, Tkinter.END)
-        text_show.insert(1.0, 'Below is the infomation of CPU2' + os.linesep)
-        text_show.insert(Tkinter.END, response_cpu2_info)
-    except BaseException:
-        tkMessageBox.showerror('ERROR', 'ERROR')
 
 
 def forcerestart_computer():
@@ -133,53 +105,51 @@ def forceon_computer():
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
-def boot_to_bios():
+def set_bootdevice():
     try:
-        url_bootdevice = "https://%s/redfish/v1/Systems/1/" % bmc_ip
-        payload = "{\"Boot\": {\"BootSourceOverrideEnabled\": \"Once\",\"BootSourceOverrideTarget\": \"BiosSetup\"}}"
-        headers = {
-            'x-auth-token': "%s" % auth_token,
-            'cache-control': "no-cache",
-        }
-        boot_to_bios_response = requests.patch(url_bootdevice, headers=headers, data=payload, verify=False)
-        statuscode_boot_to_bios = boot_to_bios_response.status_code
-        text_show.delete(0.0, Tkinter.END)
-        text_show.insert(1.0, 'Below is the Status Code of Boot to Bios:' + os.linesep)
-        text_show.insert(Tkinter.END, statuscode_boot_to_bios)
+        new_window_bootdevice = Tkinter.Toplevel()
+        new_window_bootdevice.title("设置下次启动设备".decode('gbk'))
+        new_window_bootdevice.geometry('600x300')
+        frame_sec_top = Tkinter.Frame(new_window_bootdevice, height=6)
+        frame_sec_top.pack(side=Tkinter.TOP)
+        Tkinter.Label(frame_sec_top, text='请在如下选择下次启动的设备'.decode('gbk'), bg='Yellow').pack()
+
+        frame_sec_middle = Tkinter.Frame(new_window_bootdevice, height=10)
+        frame_sec_middle.pack(fill=Tkinter.X)
+
+        frame_middle_bootdevice = Tkinter.Frame(frame_sec_middle)
+        frame_middle_bootdevice.pack()
+
+        Tkinter.Label(frame_middle_bootdevice, text='选择启动设备'.decode("gbk"), width=30, height=3).pack(side=Tkinter.TOP)
+        box_set_bootdevice = ttk.Combobox(frame_middle_bootdevice, textvariable=var_char_combox_bootdevice,
+                              values=['Pxe', 'Hdd', 'BiosSetup'], width=20)
+        box_set_bootdevice.pack(side=Tkinter.BOTTOM)
+
+        frame_sec_bottom = Tkinter.Frame(new_window_bootdevice)
+        frame_sec_bottom.pack()
+        Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, height=2, command=play_set_bootdevice).pack(
+            side=Tkinter.LEFT)
+        Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, height=2, command=new_window_bootdevice.destroy
+                       ).pack(side=Tkinter.RIGHT)
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
-def boot_to_hdd():
+def play_set_bootdevice():
     try:
-        url_bootdevice = "https://%s/redfish/v1/Systems/1/" % bmc_ip
-        payload = "{\"Boot\": {\"BootSourceOverrideEnabled\": \"Once\",\"BootSourceOverrideTarget\": \"Hdd\"}}"
+        bootdevice = var_char_combox_bootdevice.get()
+        url_set_bootdevice = "https://%s/redfish/v1/Systems/1/" % bmc_ip
+        payload = "{\"Boot\": {\"BootSourceOverrideEnabled\": \"Once\",\"BootSourceOverrideTarget\": \"%s\"}}" % bootdevice
         headers = {
             'x-auth-token': "%s" % auth_token,
             'cache-control': "no-cache",
         }
-        boot_to_hdd_response = requests.patch(url_bootdevice, headers=headers, data=payload, verify=False)
-        statuscode_boot_to_hdd = boot_to_hdd_response.status_code
+        response_set_bootdevice = requests.patch(url_set_bootdevice, headers=headers, data=payload, verify=False)
+        statuscode_set_bootdevice = response_set_bootdevice.status_code
+        print  statuscode_set_bootdevice
         text_show.delete(0.0, Tkinter.END)
-        text_show.insert(1.0, 'Below is the Status Code of Boot to Hdd:' + os.linesep)
-        text_show.insert(Tkinter.END, statuscode_boot_to_hdd)
-    except BaseException:
-        tkMessageBox.showerror('ERROR', 'ERROR')
-
-
-def boot_to_pxe():
-    try:
-        url_bootdevice = "https://%s/redfish/v1/Systems/1/" % bmc_ip
-        payload = "{\"Boot\": {\"BootSourceOverrideEnabled\": \"Once\",\"BootSourceOverrideTarget\": \"Pxe\"}}"
-        headers = {
-            'x-auth-token': "%s" % auth_token,
-            'cache-control': "no-cache",
-        }
-        boot_to_pxe_response = requests.patch(url_bootdevice, headers=headers, data=payload, verify=False)
-        statuscode_boot_to_pxe = boot_to_pxe_response.status_code
-        text_show.delete(0.0, Tkinter.END)
-        text_show.insert(1.0, 'Below is the Status Code of Boot to Pxe:' + os.linesep)
-        text_show.insert(Tkinter.END, statuscode_boot_to_pxe)
+        text_show.insert(1.0, 'Below is the Status Code of Boot to %s:' % bootdevice + os.linesep)
+        text_show.insert(Tkinter.END, statuscode_set_bootdevice)
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
@@ -634,7 +604,190 @@ def uid_current_status():
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
-# global new_window
+def get_system_info():
+    try:
+        statuscode_display, data_display = system.get_system_info_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, json.dumps(data_display, indent=4))
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_processor1_info():
+    try:
+        statuscode_display, data_display = system.get_processor1_info(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_processor2_info():
+    try:
+        statuscode_display, data_display = system.get_processor2_info(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_simplestorage():
+    try:
+        statuscode_display, data_display = system.get_simplestorage_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_info():
+    try:
+        statuscode_display, data_display = manager.get_manager_info_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, json.dumps(data_display, indent=4))
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_network_protocal():
+    try:
+        statuscode_display, data_display = manager.get_manager_network_protocal_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, json.dumps(data_display, indent=4))
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_ethernet_interface():
+    try:
+        statuscode_display, data_display = manager.get_manager_ethernet_interface_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, json.dumps(data_display, indent=4))
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_serial_interface():
+    try:
+        statuscode_display, data_display = manager.get_manager_serial_interface_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, json.dumps(data_display, indent=4))
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_logservices():
+    try:
+        pass
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_current_mousemode():
+    try:
+        statuscode_display, data_display = manager.get_manager_current_mousemode_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, '如下是当前的Mouse Mode:'.decode('gbk') + os.linesep)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def set_manager_mousemode():
+    try:
+        new_window_set_mouse = Tkinter.Toplevel()
+        new_window_set_mouse.title("修改用户的RoleId".decode('gbk'))
+        new_window_set_mouse.geometry('600x300')
+        frame_sec_top = Tkinter.Frame(new_window_set_mouse, height=6)
+        frame_sec_top.pack(side=Tkinter.TOP)
+        Tkinter.Label(frame_sec_top, text='请在如下要设置的Mouse Mode'.decode('gbk'), bg='Yellow').pack()
+
+        frame_sec_middle = Tkinter.Frame(new_window_set_mouse, height=6)
+        frame_sec_middle.pack(fill=Tkinter.X)
+
+        frame_middle_mousemode = Tkinter.Frame(frame_sec_middle)
+        frame_middle_mousemode.pack(side=Tkinter.LEFT)
+
+        Tkinter.Label(frame_middle_mousemode, text='Mode'.decode("gbk"), width=20, height=3).pack(side=Tkinter.TOP)
+
+        box_set_mousemode = ttk.Combobox(frame_middle_mousemode, textvariable=var_char_combox_mousemode,
+                                         values=['Absolute', 'Relative', 'Single'], width=10)
+        box_set_mousemode.pack(side=Tkinter.BOTTOM)
+
+        frame_sec_bottom = Tkinter.Frame(new_window_set_mouse)
+        frame_sec_bottom.pack()
+        Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, height=2, command=play_set_mousemode).pack(
+            side=Tkinter.LEFT)
+        Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, height=2,
+                       command=new_window_set_mouse.destroy).pack(side=Tkinter.RIGHT)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def play_set_mousemode():
+    try:
+        mousemode = var_char_combox_mousemode.get()
+        url_mousemode = "https://%s/redfish/v1/Managers/1/MouseMode/" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        payload = "{\"Mode\": \"%s\"}" % mousemode
+        response_set_mousemode = requests.patch(url_mousemode, headers=headers, data=payload, verify=False)
+        statuscode_set_mousemode = response_set_mousemode.status_code
+        if statuscode_set_mousemode == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+def get_manager_smtp():
+    try:
+        pass
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+
+
+
 # top
 menubar = Tkinter.Menu(root)
 helpmenu = Tkinter.Menu(menubar, tearoff=0)
@@ -695,38 +848,23 @@ frame_left.pack(side=Tkinter.LEFT, fill=Tkinter.BOTH)
 
 Tkinter.Button(frame_left, text='GET_AUTH', command=get_x_auth_token, width=30).pack()
 
-menubar_system = Tkinter.Menubutton(frame_left, text='Get_processor_info', width=30)
+menubar_system = Tkinter.Menubutton(frame_left, text='System', width=30)
 menubar_system.pack()
-menu_system_processor = Tkinter.Menu(menubar_system)
-menu_system_processor.add_command(label='Processor_1', command=get_processor1_info)
-menu_system_processor.add_command(label='Processor_2', command=get_processor2_info)
-menubar_system['menu'] = menu_system_processor
-#       power control
-menubar_power_control = Tkinter.Menubutton(frame_left, text='Power_control', width=30)
-menubar_power_control.pack()
-menu_power_control = Tkinter.Menu(menubar_power_control)
-menu_power_control.add_command(label='ForceRestart', command=forcerestart_computer)
-menu_power_control.add_command(label='ForceOff', command=forceoff_computer)
-menu_power_control.add_command(label='ForceOn', command=forceon_computer)
-menubar_power_control['menu'] = menu_power_control
+menu_system = Tkinter.Menu(menubar_system)
+menu_system_processor = Tkinter.Menu(menu_system)
+menu_system_power_control = Tkinter.Menu(menu_system)
+menu_system.add_cascade(label='CPU信息'.decode('gbk'), menu=menu_system_processor)
+menu_system_processor.add_command(label='CPU1', command=get_processor1_info)
+menu_system_processor.add_command(label='CPU2', command=get_processor2_info)
+menu_system.add_command(label='SimpleStorage', command=get_simplestorage)
+menu_system.add_command(label='设置启动设备'.decode('gbk'), command=set_bootdevice)
+menu_system.add_cascade(label='Power control', menu=menu_system_power_control)
+menu_system_power_control.add_command(label='ForceRestart', command=forcerestart_computer)
+menu_system_power_control.add_command(label='ForceOff', command=forceoff_computer)
+menu_system_power_control.add_command(label='ForceOn', command=forceon_computer)
 
-menubar_bootdevice = Tkinter.Menubutton(frame_left, text='Bootdevice', width=30)
-menubar_bootdevice.pack()
-menu_bootdevice = Tkinter.Menu(menubar_bootdevice)
-menu_bootdevice.add_command(label='PXE', command=boot_to_pxe)
-menu_bootdevice.add_command(label='BIOS', command=boot_to_bios)
-menu_bootdevice.add_command(label='HDD', command=boot_to_hdd)
-#        self.menu_bootdevice.add_command(label='FloppyRemovableMedia', command=self.boot_to_floppyremovablemedia)
-#        self.menu_bootdevice.add_command(label='UsbKey',command=self.boot_to_usbkey)
-#        self.menu_bootdevice.add_command(label='UsbHdd', command=self.boot_to_usbhdd)
-#        self.menu_bootdevice.add_command(label='UsbFloppy', command=self.boot_to_usbfloppy)
-#        self.menu_bootdevice.add_command(label='UsbCd', command=self.boot_to_usbcd)
-#        self.menu_bootdevice.add_command(label='UefiUsbKey', commmand=self.boot_to_uefiusbkey)
-#        self.menu_bootdevice.add_command(label='UefiCd', command=self.boot_to_ueficd)
-#        self.menu_bootdevice.add_command(label='UefiHdd', command=self.boot_to_uefihdd)
-#        self.menu_bootdevice.add_command(label='UefiUsbHdd',command=self.boot_to_uefiusbhdd)
-#        self.menu_bootdevice.add_command(label='UefiUsbCd'.command=self.boot_to_uefiusbcd)
-menubar_bootdevice['menu'] = menu_bootdevice
+menubar_system['menu'] = menu_system
+
 
 menubar_account = Tkinter.Menubutton(frame_left, text='用户服务'.decode('gbk'), width=30)
 menubar_account.pack()
@@ -755,5 +893,20 @@ menu_chassis_uid.add_command(label='当前状态'.decode('gbk'), command=uid_current
 menu_chassis_uid.add_command(label='Blinking'.decode('gbk'), command=uid_blinking)
 menu_chassis_uid.add_command(label='关闭'.decode('gbk'), command=uid_off)
 menubar_chassis['menu'] = menu_chassis
+
+menubar_manager = Tkinter.Menubutton(frame_left, text='Manager', width=30)
+menubar_manager.pack()
+menu_manager = Tkinter.Menu(menubar_manager)
+menu_manager_mousemode = Tkinter.Menu(menu_manager)
+menu_manager.add_command(label='获取Manager信息'.decode('gbk'), command=get_manager_info)
+menu_manager.add_command(label='获取NetworkProtocol信息'.decode('gbk'), command=get_manager_network_protocal)
+menu_manager.add_command(label='获取EthernetInterfaces信息'.decode('gbk'), command=get_manager_ethernet_interface)
+menu_manager.add_command(label='获取SerialInterfaces信息'.decode('gbk'), command=get_manager_serial_interface)
+menu_manager.add_command(label='获取LogServices信息'.decode('gbk'), command=get_manager_logservices)
+menu_manager.add_cascade(label='MouseMode', menu=menu_manager_mousemode)
+menu_manager_mousemode.add_command(label='获取当前状态'.decode('gbk'), command=get_manager_current_mousemode)
+menu_manager_mousemode.add_command(label='MouseMode'.decode('gbk'), command=set_manager_mousemode)
+menu_manager.add_command(label='获取SMTP信息'.decode('gbk'), command=get_manager_smtp)
+menubar_manager['menu'] = menu_manager
 
 Tkinter.mainloop()
