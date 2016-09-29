@@ -10,6 +10,7 @@ import account_service
 import chassis
 import system
 import manager
+import session
 
 auth_token = 0
 bmc_ip = 0
@@ -32,6 +33,7 @@ var_char_entry_new_passwd = Tkinter.StringVar()
 var_char_fanmode = Tkinter.StringVar()
 var_char_combox_bootdevice = Tkinter.StringVar()
 var_char_combox_mousemode = Tkinter.StringVar()
+var_char_entry_new_session_timeout = Tkinter.StringVar()
 
 
 def get_x_auth_token():
@@ -367,7 +369,7 @@ def change_account_roleid():
         frame_sec_bottom = Tkinter.Frame(new_window_change_roleid)
         frame_sec_bottom.pack()
         Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, height=2, command=play_change_roleid).pack(
-            side=Tkinter.LEFT)
+                       side=Tkinter.LEFT)
         Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, height=2,
                        command=new_window_change_roleid.destroy).pack(side=Tkinter.RIGHT)
     except BaseException:
@@ -710,7 +712,14 @@ def get_manager_serial_interface():
 
 def get_manager_logservices():
     try:
-        pass
+        statuscode_display, number_logs_display, data_display = manager.get_manager_logservices_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        for line in data_display:
+            text_show.insert(Tkinter.END, line)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
@@ -778,14 +787,115 @@ def play_set_mousemode():
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
-def get_manager_smtp():
+
+def get_manager_ntp_info():
     try:
-        pass
+        statuscode_display, data_display = manager.get_manager_ntp_info_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
+def clear_sel_log():
+    try:
+        statuscode_display = manager.clear_sel_log_sub(bmc_ip, auth_token)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '日志清除成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '日志清除失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
 
+
+def reset_bmc():
+    try:
+        statuscode_display  = manager.reset_bmc_sub(bmc_ip, auth_token)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), 'BMC重启成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), 'BMC重启失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def bmc_restore_factory():
+    try:
+        statuscode_display  = manager.reset_bmc_sub(bmc_ip, auth_token)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), 'BMC重启成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), 'BMC重启失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_session_info():
+    try:
+        statuscode_display, title_display, data_display = session.get_session_num_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(1.0, title_display + os.linesep)
+        for line in data_display:
+            text_show.insert(Tkinter.END, line)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def update_session_timeout():
+    try:
+        new_window_set_session_timeout = Tkinter.Toplevel()
+        new_window_set_session_timeout.title("设置session的timeout".decode('gbk'))
+        new_window_set_session_timeout.geometry('600x300')
+        frame_sec_top = Tkinter.Frame(new_window_set_session_timeout, height=6)
+        frame_sec_top.pack(side=Tkinter.TOP)
+        Tkinter.Label(frame_sec_top, text='请在如下输入要设置的Timeout时间，单位是秒'.decode('gbk'), bg='Yellow').pack()
+
+        frame_sec_middle = Tkinter.Frame(new_window_set_session_timeout, height=6)
+        frame_sec_middle.pack(fill=Tkinter.X)
+
+        frame_middle_session_timeout = Tkinter.Frame(frame_sec_middle)
+        frame_middle_session_timeout.pack()
+
+        Tkinter.Label(frame_middle_session_timeout, text='TIMEOUT'.decode("gbk"), width=20, height=3).pack(side=Tkinter.TOP)
+
+        Tkinter.Entry(frame_middle_session_timeout, textvariable=var_char_entry_new_session_timeout, width=10,font=('Helvetica',
+                     '10')).pack(side=Tkinter.BOTTOM)
+
+        frame_sec_bottom = Tkinter.Frame(new_window_set_session_timeout)
+        frame_sec_bottom.pack()
+        Tkinter.Button(frame_sec_bottom, text='确定'.decode('gbk'), width=30, height=2, command=play_update_session_timeout
+                       ).pack(side=Tkinter.LEFT)
+        Tkinter.Button(frame_sec_bottom, text='退出'.decode('gbk'), width=30, height=2,
+                       command=new_window_set_session_timeout.destroy).pack(side=Tkinter.RIGHT)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def play_update_session_timeout():
+    try:
+        new_timeout = var_char_entry_new_session_timeout.get()
+        url_session_timeout = "https://%s/redfish/v1/SessionService/" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        payload = "{\"SessionTimeout\": %s}" % new_timeout
+        response_update_session_timeout = requests.patch(url_session_timeout, headers=headers, data=payload, verify=False)
+        statuscode_update_session_timeout = response_update_session_timeout.status_code
+        if statuscode_update_session_timeout == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '设置成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '设置失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
 
 
 # top
@@ -903,10 +1013,19 @@ menu_manager.add_command(label='获取NetworkProtocol信息'.decode('gbk'), command=
 menu_manager.add_command(label='获取EthernetInterfaces信息'.decode('gbk'), command=get_manager_ethernet_interface)
 menu_manager.add_command(label='获取SerialInterfaces信息'.decode('gbk'), command=get_manager_serial_interface)
 menu_manager.add_command(label='获取LogServices信息'.decode('gbk'), command=get_manager_logservices)
+menu_manager.add_command(label='清除SEL'.decode('gbk'), command=clear_sel_log)
+menu_manager.add_command(label='重启BMC'.decode('gbk'), command=reset_bmc)
+menu_manager.add_command(label='恢复出厂设置'.decode('gbk'), command=bmc_restore_factory)
 menu_manager.add_cascade(label='MouseMode', menu=menu_manager_mousemode)
 menu_manager_mousemode.add_command(label='获取当前状态'.decode('gbk'), command=get_manager_current_mousemode)
 menu_manager_mousemode.add_command(label='MouseMode'.decode('gbk'), command=set_manager_mousemode)
-menu_manager.add_command(label='获取SMTP信息'.decode('gbk'), command=get_manager_smtp)
+menu_manager.add_command(label='获取NTP信息'.decode('gbk'), command=get_manager_ntp_info)
 menubar_manager['menu'] = menu_manager
 
+menubar_session = Tkinter.Menubutton(frame_left, text='Session', width=30)
+menubar_session.pack()
+menu_session = Tkinter.Menu(menubar_session)
+menu_session.add_command(label='查看当前session信息'.decode('gbk'), command=get_session_info)
+menu_session.add_command(label='设置新的Session Timeout'.decode('gbk'), command=update_session_timeout)
+menubar_session['menu'] = menu_session
 Tkinter.mainloop()
