@@ -6,6 +6,8 @@ import os
 import json
 import tkMessageBox
 import ttk
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_session_num_sub(bmc_ip, auth_token):
@@ -20,7 +22,6 @@ def get_session_num_sub(bmc_ip, auth_token):
         statuscode_get_session_num = response_get_session_num.status_code
         num_session = response_get_session_num.json()['Members@odata.count']
         title_session = 'ID'.ljust(15) + 'UseName'.ljust(15)
-        print title_session
         for count in range(1,num_session):
             url_sessioon_sub = "https://%s/redfish/v1/SessionService/Sessions/%s" % (bmc_ip, count)
             response_get_session_sub = requests.get(url_sessioon_sub, headers=headers, verify=False).json()

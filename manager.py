@@ -6,6 +6,8 @@ import os
 import json
 import tkMessageBox
 import ttk
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_manager_info_sub(bmc_ip, auth_token):
@@ -114,6 +116,52 @@ def get_manager_ntp_info_sub(bmc_ip, auth_token):
         response_get_manager_ntp = requests.get(url_manager_ntp, headers=headers, verify=False)
         statuscode_get_ntp = response_get_manager_ntp.status_code
         return statuscode_get_ntp, json.dumps(response_get_manager_ntp.json(), indent=4)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_smtp_info_sub(bmc_ip, auth_token):
+    try:
+        url_manager_smtp = "https://%s/redfish/v1/Managers/1/SMTP" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        response_get_manager_smtp = requests.get(url_manager_smtp, headers=headers, verify=False)
+        statuscode_get_smtp = response_get_manager_smtp.status_code
+        return statuscode_get_smtp, json.dumps(response_get_manager_smtp.json(), indent=4)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_ad_sub(bmc_ip, auth_token):
+    try:
+        url_manager_ad = "https://%s/redfish/v1/Managers/1/ActiveDirectory" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        response_get_manager_ad = requests.get(url_manager_ad, headers=headers, verify=False)
+        statuscode_get_ad = response_get_manager_ad.status_code
+        url_manager_ad_sub = "https://%s/redfish/v1/Managers/1/ActiveDirectory/RoleGroups" % bmc_ip
+        response_get_manager_ad_sub = requests.get(url_manager_ad_sub, headers=headers, verify=False)
+        statuscode_get_ad_sub = response_get_manager_ad_sub.status_code
+        return statuscode_get_ad, statuscode_get_ad_sub, json.dumps(response_get_manager_ad.json(), indent=4), json.dumps(
+            response_get_manager_ad_sub.json(), indent=4)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_ldap_sub(bmc_ip, auth_token):
+    try:
+        url_manager_ldap = "https://%s/redfish/v1/Managers/1/LDAP" % bmc_ip
+        headers = {
+            'x-auth-token': "%s" % auth_token,
+            'cache-control': "no-cache",
+        }
+        response_get_manager_ldap = requests.get(url_manager_ldap, headers=headers, verify=False)
+        statuscode_get_ldap = response_get_manager_ldap.status_code
+        return statuscode_get_ldap, json.dumps(response_get_manager_ldap.json(), indent=4)
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 

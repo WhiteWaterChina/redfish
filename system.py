@@ -6,6 +6,8 @@ import os
 import json
 import tkMessageBox
 import ttk
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 def get_system_info_sub(bmc_ip, auth_token):

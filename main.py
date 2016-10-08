@@ -11,6 +11,8 @@ import chassis
 import system
 import manager
 import session
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 auth_token = 0
 bmc_ip = 0
@@ -801,6 +803,46 @@ def get_manager_ntp_info():
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
+def get_manager_smtp_info():
+    try:
+        statuscode_display, data_display = manager.get_manager_smtp_info_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_ad():
+    try:
+        statuscode_display_1, statuscode_display_2, data_display_1, data_display_2 = manager.get_manager_ad_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display_1 + os.linesep)
+        text_show.insert(Tkinter.END, os.linesep + data_display_1 + os.linesep)
+        if statuscode_display_1 == 200 and statuscode_display_2 == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def get_manager_ldap():
+    try:
+        statuscode_display, data_display  = manager.get_manager_ldap_sub(bmc_ip, auth_token)
+        text_show.delete(0.0, Tkinter.END)
+        text_show.insert(Tkinter.END, data_display + os.linesep)
+        if statuscode_display == 200:
+            tkMessageBox.showinfo('成功'.decode('gbk'), '获取成功'.decode('gbk'))
+        else:
+            tkMessageBox.showerror('错误'.decode('gbk'), '获取失败，请检查输入选项'.decode('gbk'))
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
 def clear_sel_log():
     try:
         statuscode_display = manager.clear_sel_log_sub(bmc_ip, auth_token)
@@ -1020,6 +1062,9 @@ menu_manager.add_cascade(label='MouseMode', menu=menu_manager_mousemode)
 menu_manager_mousemode.add_command(label='获取当前状态'.decode('gbk'), command=get_manager_current_mousemode)
 menu_manager_mousemode.add_command(label='MouseMode'.decode('gbk'), command=set_manager_mousemode)
 menu_manager.add_command(label='获取NTP信息'.decode('gbk'), command=get_manager_ntp_info)
+menu_manager.add_command(label='获取SMTP信息'.decode('gbk'), command=get_manager_smtp_info)
+menu_manager.add_command(label='获取ActiveDirectory信息'.decode('gbk'), command=get_manager_ad)
+menu_manager.add_command(label='获取LDAP信息'.decode('gbk'), command=get_manager_ldap)
 menubar_manager['menu'] = menu_manager
 
 menubar_session = Tkinter.Menubutton(frame_left, text='Session', width=30)
