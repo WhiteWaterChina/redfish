@@ -19,7 +19,7 @@ bmc_ip = 0
 root = Tkinter.Tk()
 root.title("Redfish测试工具".decode('gbk'))
 root.geometry('800x600')
-#        self.root.iconbitmap('inspur.ico')
+# self.root.iconbitmap('inspur.ico')
 root.resizable(width=True, height=True)
 var_char_entry_username_add = Tkinter.StringVar()
 var_char_entry_password_add = Tkinter.StringVar()
@@ -160,13 +160,17 @@ def play_set_bootdevice():
 
 def showhelp():
     try:
-        helpdetail = ''' 这里是测试使用说明!
-            请先在窗口中分别输入要测试的BMC的IP/用户名/密码。
-            然后点击GET_AUTH获取x-auth-token。再进行后面的测试。
-            Token的有效期是30分钟，如果测试中出现unauthorized的错误时，
-            请重新点击GET_AUTH来获取x-auth-token'''.decode('gbk')
+        helpdetail = ''' 这里是测试使用说明!!!!!:%s 请先在窗口中分别输入要测试的BMC的IP/用户名/密码。%s 然后点击GET_AUTH获取x-auth-token。再进行后面的测试。%s Token的默认有效期是30分钟，如果测试中出现unauthorized的错误时，%s 请重新点击GET_AUTH来获取x-auth-token'''.decode('gbk') % (os.linesep, os.linesep, os.linesep, os.linesep)
         text_show.delete(0.0, Tkinter.END)
         text_show.insert(1.0, helpdetail + os.linesep)
+    except BaseException:
+        tkMessageBox.showerror('ERROR', 'ERROR')
+
+
+def about():
+    try:
+        info_about = "Author:闫硕".decode('gbk') + os.linesep + "Email:yanshuo@inspur.com".decode('gbk')
+        tkMessageBox.showinfo('关于'.decode('gbk'), info_about)
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
@@ -944,7 +948,9 @@ def play_update_session_timeout():
 menubar = Tkinter.Menu(root)
 helpmenu = Tkinter.Menu(menubar, tearoff=0)
 helpmenu.add_command(label="使用说明".decode('gbk'), command=showhelp)
-menubar.add_cascade(label="Usage", menu=helpmenu)
+helpmenu.add_command(label="关于".decode('gbk'), command=about)
+menubar.add_cascade(label="帮助".decode('gbk'), menu=helpmenu)
+
 root.config(menu=menubar)
 
 # top_frame
@@ -992,7 +998,7 @@ scroll_text_bottom.config(command=text_show.xview)
 scroll_text_right.pack(fill="y", expand=0, side=Tkinter.RIGHT, anchor=Tkinter.N)
 scroll_text_bottom.pack(fill="x", expand=0, side=Tkinter.BOTTOM, anchor=Tkinter.N)
 text_show.pack(fill=Tkinter.BOTH)
-text_show.insert('1.0', 'hello!')
+text_show.insert('1.0', '欢迎使用Redfish测试工具!有问题请联系闫硕帅哥~~'.decode('gbk'))
 
 # left_button
 frame_left = Tkinter.Frame(root)

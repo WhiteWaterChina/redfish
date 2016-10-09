@@ -7,10 +7,11 @@ import json
 import tkMessageBox
 import ttk
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
-def uid_current_status(bmc_ip,auth_token):
+def uid_current_status(bmc_ip, auth_token):
     try:
         url_uid = "https://%s/redfish/v1/Systems/1" % bmc_ip
         headers = {
@@ -25,7 +26,7 @@ def uid_current_status(bmc_ip,auth_token):
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
-def uid_off(bmc_ip,auth_token):
+def uid_off(bmc_ip, auth_token):
     try:
         url_uid = "https://%s/redfish/v1/Systems/1/" % bmc_ip
         headers = {
@@ -33,14 +34,14 @@ def uid_off(bmc_ip,auth_token):
             'cache-control': "no-cache",
         }
         payload = "{\"IndicatorLED\": \"Off\"}"
-        uid_off = requests.patch(url_uid, headers=headers, data=payload, verify=False)
-        statuscode_uid_off = uid_off.status_code
+        uid_off_sub = requests.patch(url_uid, headers=headers, data=payload, verify=False)
+        statuscode_uid_off = uid_off_sub.status_code
         return statuscode_uid_off
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
 
 
-def uid_blinking(bmc_ip,auth_token):
+def uid_blinking(bmc_ip, auth_token):
     try:
         url_uid = "https://%s/redfish/v1/Systems/1/" % bmc_ip
         headers = {
@@ -96,9 +97,11 @@ def get_chassis_power_info(bmc_ip, auth_token):
             LowerThresholdNonCritical = item['LowerThresholdNonCritical']
             LowerThresholdCritical = item['LowerThresholdCritical']
             LowerThresholdFatal = item['LowerThresholdFatal']
-            line_to_add = str(sensorname).ljust(15) + str(sensornumber).ljust(15) + str(ReadingVolts).ljust(20) + str(UpperThresholdNonCritical).ljust(
-                          30) + str(UpperThresholdCritical).ljust(30) + str(UpperThresholdFatal).ljust(30) + str(LowerThresholdNonCritical).ljust(
-                          30) + str(LowerThresholdCritical).ljust(30) + str(LowerThresholdFatal).ljust(30)
+            line_to_add = str(sensorname).ljust(15) + str(sensornumber).ljust(15) + str(ReadingVolts).ljust(20) + str(
+                UpperThresholdNonCritical).ljust(
+                30) + str(UpperThresholdCritical).ljust(30) + str(UpperThresholdFatal).ljust(30) + str(
+                LowerThresholdNonCritical).ljust(
+                30) + str(LowerThresholdCritical).ljust(30) + str(LowerThresholdFatal).ljust(30)
             data_to_display.append(line_to_add)
         return statuscode_get_chassis_info, tilte_power, data_to_display
     except BaseException:
@@ -115,9 +118,11 @@ def get_chassis_thermal_info(bmc_ip, auth_token):
         response_get_chassis_thermal_info = requests.get(url_chassis_thermal, headers=headers, verify=False)
         statuscode_get_chassis_thermal_info = response_get_chassis_thermal_info.status_code
         data_to_filter_thermal = response_get_chassis_thermal_info.json()['Temperatures']
-        title_thermal = 'Name'.ljust(20) + 'State'.ljust(15) + 'ReadingCelsius'.ljust(15) + 'SensorNumber'.ljust(15) + 'UpperThresholdNonCritical'.ljust(
-                        30) + 'UpperThresholdCritical'.ljust(30) + 'UpperThresholdFatal'.ljust(30) + 'LowerThresholdNonCritical'.ljust(
-                        30) + 'LowerThresholdCritical'.ljust(30) + 'LowerThresholdFatal'.ljust(30)
+        title_thermal = 'Name'.ljust(20) + 'State'.ljust(15) + 'ReadingCelsius'.ljust(15) + 'SensorNumber'.ljust(
+            15) + 'UpperThresholdNonCritical'.ljust(
+            30) + 'UpperThresholdCritical'.ljust(30) + 'UpperThresholdFatal'.ljust(
+            30) + 'LowerThresholdNonCritical'.ljust(
+            30) + 'LowerThresholdCritical'.ljust(30) + 'LowerThresholdFatal'.ljust(30)
         data_display_thermal = []
         for item in data_to_filter_thermal:
             Name = item['Name']
@@ -128,11 +133,13 @@ def get_chassis_thermal_info(bmc_ip, auth_token):
             UpperThresholdCritical = item['UpperThresholdCritical']
             UpperThresholdFatal = item['UpperThresholdFatal']
             LowerThresholdNonCritical = item['LowerThresholdNonCritical']
-            LowerThresholdCritical =  item['LowerThresholdCritical']
+            LowerThresholdCritical = item['LowerThresholdCritical']
             LowerThresholdFatal = item['LowerThresholdFatal']
 
-            line_to_add_thermal = str(Name).ljust(20) + str(State).ljust(15) + str(ReadingCelsius).ljust(15) + str(SensorNumber).ljust(15) + str(UpperThresholdNonCritical).ljust(30) + str(UpperThresholdCritical).ljust(30) + str(UpperThresholdFatal).ljust(30
-                                  ) + str(LowerThresholdNonCritical).ljust(30) + str(LowerThresholdCritical).ljust(30) + str(LowerThresholdFatal).ljust(30)
+            line_to_add_thermal = str(Name).ljust(20) + str(State).ljust(15) + str(ReadingCelsius).ljust(15) + str(
+                SensorNumber).ljust(15) + str(UpperThresholdNonCritical).ljust(30) + str(UpperThresholdCritical).ljust(
+                30) + str(UpperThresholdFatal).ljust(30) + str(LowerThresholdNonCritical).ljust(30) + str(
+                LowerThresholdCritical).ljust(30) + str(LowerThresholdFatal).ljust(30)
             data_display_thermal.append(line_to_add_thermal)
         return statuscode_get_chassis_thermal_info, title_thermal, data_display_thermal
     except BaseException:
@@ -152,4 +159,3 @@ def get_chassis_fanmode(bmc_ip, auth_token):
         return statuscode_get_chassis_fanmode, data_display
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
-

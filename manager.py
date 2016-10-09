@@ -7,6 +7,7 @@ import json
 import tkMessageBox
 import ttk
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
@@ -96,8 +97,8 @@ def get_manager_logservices_sub(bmc_ip, auth_token):
         statuscode_get_number_log = response_get_manager_logservice.status_code
         number_log_entries = response_get_manager_logservice.json()['Members@odata.count']
         data_log_sum = []
-        for count in range(1,number_log_entries+1):
-            url_get_log = "https://%s/redfish/v1/Managers/1/LogServices/Log1/Entries/%s" % (bmc_ip,count)
+        for count in range(1, number_log_entries + 1):
+            url_get_log = "https://%s/redfish/v1/Managers/1/LogServices/Log1/Entries/%s" % (bmc_ip, count)
             response_get_log = requests.get(url_get_log, headers=headers, verify=False)
             data_log = json.dumps(response_get_log.json(), indent=4)
             data_log_sum.append(data_log + os.linesep)
@@ -146,7 +147,8 @@ def get_manager_ad_sub(bmc_ip, auth_token):
         url_manager_ad_sub = "https://%s/redfish/v1/Managers/1/ActiveDirectory/RoleGroups" % bmc_ip
         response_get_manager_ad_sub = requests.get(url_manager_ad_sub, headers=headers, verify=False)
         statuscode_get_ad_sub = response_get_manager_ad_sub.status_code
-        return statuscode_get_ad, statuscode_get_ad_sub, json.dumps(response_get_manager_ad.json(), indent=4), json.dumps(
+        return statuscode_get_ad, statuscode_get_ad_sub, json.dumps(response_get_manager_ad.json(),
+                                                                    indent=4), json.dumps(
             response_get_manager_ad_sub.json(), indent=4)
     except BaseException:
         tkMessageBox.showerror('ERROR', 'ERROR')
@@ -173,8 +175,8 @@ def clear_sel_log_sub(bmc_ip, auth_token):
             'x-auth-token': "%s" % auth_token,
             'cache-control': "no-cache",
         }
-        payload =  "{\"Actions\": {\"ClearLog\"}"
-        response_clear_sel = requests.post(url_manager_clearsel, headers=headers, data=payload,  verify=False)
+        payload = "{\"Actions\": {\"ClearLog\"}"
+        response_clear_sel = requests.post(url_manager_clearsel, headers=headers, data=payload, verify=False)
         statuscode_clear_sel = response_clear_sel.status_code
         return statuscode_clear_sel
     except BaseException:
